@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recipe Box</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #fdf6ec;
+      --paper: #fff8f0;
+      --ink: #1a1208;
+      --faded: #7a6a52;
+      --rule: #e2d5c0;
+      --red: #c0392b;
+      --red-light: #f9eeec;
+      --green: #2c6e49;
+    }
+
+    body {
+      font-family: 'IBM Plex Mono', monospace;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    header {
+      max-width: 780px;
+      margin: 0 auto 2.5rem;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 1rem;
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      font-style: italic;
+      letter-spacing: -0.5px;
+    }
+
+    header span {
+      font-size: 0.75rem;
+      color: var(--faded);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .container { max-width: 780px; margin: 0 auto; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .controls input[type="text"] {
+      flex: 1;
+      min-width: 160px;
+      padding: 0.55rem 0.8rem;
+      border: 1.5px solid var(--ink);
+      background: var(--paper);
+      font-family: inherit;
+      font-size: 0.82rem;
+    }
+
+    button {
+      padding: 0.55rem 1rem;
+      border: 1.5px solid var(--ink);
+      background: var(--ink);
+      color: var(--cream);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82rem;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: background 0.15s, color 0.15s;
+    }
+    button:hover { background: var(--faded); border-color: var(--faded); }
+    button.secondary {
+      background: transparent;
+      color: var(--ink);
+    }
+    button.secondary:hover { background: var(--rule); }
+    button.danger { background: var(--red); border-color: var(--red); }
+    button.danger:hover { background: #96281b; border-color: #96281b; }
+
+    /* ── Recipe Cards ── */
+    #recipe-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .recipe-card {
+      background: var(--paper);
+      border: 1.5px solid var(--rule);
+      border-left: 4px solid var(--ink);
+      padding: 1rem 1.2rem;
+      animation: slideIn 0.2s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      cursor: pointer;
+    }
+
+    .card-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      font-weight: 500;
+      flex: 1;
+    }
+
+    .card-meta {
+      font-size: 0.7rem;
+      color: var(--faded);
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-top: 0.25rem;
+      letter-spacing: 0.04em;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.4rem;
+      flex-shrink: 0;
+    }
+
+    .card-actions button {
+      padding: 0.3rem 0.65rem;
+      font-size: 0.72rem;
+    }
+
+    .card-body {
+      display: none;
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--rule);
+    }
+    .card-body.open { display: block; }
+
+    .card-body h3 {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faded);
+      margin-bottom: 0.4rem;
+      margin-top: 0.8rem;
+    }
+    .card-body h3:first-child { margin-top: 0; }
+
+    .card-body p, .card-body li {
+      font-size: 0.82rem;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+    .card-body ul { padding-left: 1.2rem; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,18,8,0.55);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      padding: 1.8rem;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: popIn 0.18s ease;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .modal h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      margin-bottom: 1.4rem;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.7rem;
+    }
+
+    .field { margin-bottom: 1.1rem; }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--faded);
+      margin-bottom: 0.3rem;
+    }
+
+    input[type="text"], input[type="number"], textarea, select {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid var(--rule);
+      background: var(--cream);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--ink);
+      transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--ink);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .error-msg {
+      font-size: 0.72rem;
+      color: var(--red);
+      margin-top: 0.25rem;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      margin-top: 1.4rem;
+      border-top: 1px solid var(--rule);
+      padding-top: 1.1rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--faded);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      border: 1.5px dashed var(--rule);
+    }
+    .empty-state strong {
+      display: block;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+      font-style: italic;
+    }
+
+    #recipe-count {
+      font-size: 0.72rem;
+      color: var(--faded);
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Recipe Box</h1>
+  <span>household recipe manager · v0.1.0</span>
+</header>
+
+<div class="container">
+  <div class="controls">
+    <input type="text" id="search-input" placeholder="search recipes…" oninput="renderRecipes()" />
+    <button onclick="openModal()">+ add recipe</button>
+  </div>
+
+  <div id="recipe-count"></div>
+  <div id="recipe-list"></div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <h2 id="modal-title">add recipe</h2>
+
+    <div class="field">
+      <label for="f-name">recipe name *</label>
+      <input type="text" id="f-name" placeholder="e.g. Grandma's Chili" />
+      <div class="error-msg" id="err-name">Name is required.</div>
+    </div>
+
+    <div class="field">
+      <label for="f-category">category</label>
+      <select id="f-category">
+        <option value="">— none —</option>
+        <option>Breakfast</option>
+        <option>Lunch</option>
+        <option>Dinner</option>
+        <option>Dessert</option>
+        <option>Snack</option>
+        <option>Drink</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="f-servings">servings</label>
+      <input type="number" id="f-servings" min="1" placeholder="e.g. 4" />
+      <div class="error-msg" id="err-servings">Servings must be a positive number.</div>
+    </div>
+
+    <div class="field">
+      <label for="f-ingredients">ingredients *</label>
+      <textarea id="f-ingredients" rows="4" placeholder="one per line&#10;e.g. 2 cups flour&#10;1 tsp salt"></textarea>
+      <div class="error-msg" id="err-ingredients">At least one ingredient is required.</div>
+    </div>
+
+    <div class="field">
+      <label for="f-instructions">instructions *</label>
+      <textarea id="f-instructions" rows="5" placeholder="step-by-step instructions…"></textarea>
+      <div class="error-msg" id="err-instructions">Instructions are required.</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal()">cancel</button>
+      <button id="modal-save-btn" onclick="saveRecipe()">save recipe</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─────────────────────────────────────────────
+  //  DATA LAYER  (pure functions — easy to test)
+  // ─────────────────────────────────────────────
+
+  /**
+   * Validate a recipe object.
+   * Returns { valid: boolean, errors: string[] }
+   */
+  function validateRecipe(recipe) {
+    const errors = [];
+    if (!recipe.name || recipe.name.trim() === '') {
+      errors.push('name');
+    }
+    if (!recipe.ingredients || recipe.ingredients.trim() === '') {
+      errors.push('ingredients');
+    }
+    if (!recipe.instructions || recipe.instructions.trim() === '') {
+      errors.push('instructions');
+    }
+    if (recipe.servings !== '' && recipe.servings !== null && recipe.servings !== undefined) {
+      const n = Number(recipe.servings);
+      if (isNaN(n) || n < 1) errors.push('servings');
+    }
+    return { valid: errors.length === 0, errors };
+  }
+
+  /**
+   * Create a new recipe object with a generated id.
+   */
+  function createRecipe(fields) {
+    return {
+      id: Date.now().toString(),
+      name: fields.name.trim(),
+      category: fields.category || '',
+      servings: fields.servings ? Number(fields.servings) : null,
+      ingredients: fields.ingredients.trim(),
+      instructions: fields.instructions.trim(),
+      createdAt: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Add a recipe to an array. Returns a new array (immutable).
+   */
+  function addRecipe(recipes, recipe) {
+    return [...recipes, recipe];
+  }
+
+  /**
+   * Update a recipe by id. Returns a new array (immutable).
+   */
+  function updateRecipe(recipes, id, fields) {
+    return recipes.map(r =>
+      r.id === id
+        ? { ...r, ...fields, name: fields.name.trim(), ingredients: fields.ingredients.trim(), instructions: fields.instructions.trim() }
+        : r
+    );
+  }
+
+  /**
+   * Delete a recipe by id. Returns a new array (immutable).
+   */
+  function deleteRecipe(recipes, id) {
+    return recipes.filter(r => r.id !== id);
+  }
+
+  /**
+   * Search recipes by name or ingredient.
+   * Returns filtered array.
+   */
+  function searchRecipes(recipes, query) {
+    if (!query || query.trim() === '') return recipes;
+    const q = query.toLowerCase().trim();
+    return recipes.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      r.ingredients.toLowerCase().includes(q) ||
+      (r.category && r.category.toLowerCase().includes(q))
+    );
+  }
+
+  /**
+   * Persist recipes to localStorage.
+   */
+  function saveToStorage(recipes) {
+    localStorage.setItem('recipebox_recipes', JSON.stringify(recipes));
+  }
+
+  /**
+   * Load recipes from localStorage.
+   */
+  function loadFromStorage() {
+    try {
+      const raw = localStorage.getItem('recipebox_recipes');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  //  APP STATE
+  // ─────────────────────────────────────────────
+
+  let recipes = loadFromStorage();
+  let editingId = null; // null = adding, string = editing
+
+  // ─────────────────────────────────────────────
+  //  UI RENDERING
+  // ─────────────────────────────────────────────
+
+  function renderRecipes() {
+    const query = document.getElementById('search-input').value;
+    const visible = searchRecipes(recipes, query);
+    const list = document.getElementById('recipe-list');
+    const count = document.getElementById('recipe-count');
+
+    count.textContent = `${visible.length} recipe${visible.length !== 1 ? 's' : ''}${query ? ' found' : ' saved'}`;
+
+    if (visible.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <strong>${query ? 'No matches.' : 'No recipes yet.'}</strong>
+          ${query ? 'Try a different search term.' : 'Click "+ add recipe" to get started.'}
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = visible.map(r => `
+      <div class="recipe-card" id="card-${r.id}">
+        <div class="card-header" onclick="toggleCard('${r.id}')">
+          <div>
+            <h2>${escapeHtml(r.name)}</h2>
+            <div class="card-meta">
+              ${r.category ? `<span>📂 ${escapeHtml(r.category)}</span>` : ''}
+              ${r.servings ? `<span>🍽 ${r.servings} servings</span>` : ''}
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="secondary" onclick="event.stopPropagation(); openModal('${r.id}')">edit</button>
+            <button class="danger" onclick="event.stopPropagation(); handleDelete('${r.id}')">delete</button>
+          </div>
+        </div>
+        <div class="card-body" id="body-${r.id}">
+          <h3>ingredients</h3>
+          <ul>
+            ${r.ingredients.split('\n').filter(l => l.trim()).map(l => `<li>${escapeHtml(l.trim())}</li>`).join('')}
+          </ul>
+          <h3>instructions</h3>
+          <p>${escapeHtml(r.instructions).replace(/\n/g, '<br/>')}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function toggleCard(id) {
+    const body = document.getElementById('body-' + id);
+    body.classList.toggle('open');
+  }
+
+  // ─────────────────────────────────────────────
+  //  MODAL
+  // ─────────────────────────────────────────────
+
+  function openModal(id) {
+    editingId = id || null;
+    const overlay = document.getElementById('modal-overlay');
+    const title = document.getElementById('modal-title');
+    const btn = document.getElementById('modal-save-btn');
+
+    clearErrors();
+
+    if (editingId) {
+      const r = recipes.find(r => r.id === editingId);
+      title.textContent = 'edit recipe';
+      btn.textContent = 'save changes';
+      document.getElementById('f-name').value = r.name;
+      document.getElementById('f-category').value = r.category || '';
+      document.getElementById('f-servings').value = r.servings || '';
+      document.getElementById('f-ingredients').value = r.ingredients;
+      document.getElementById('f-instructions').value = r.instructions;
+    } else {
+      title.textContent = 'add recipe';
+      btn.textContent = 'save recipe';
+      document.getElementById('f-name').value = '';
+      document.getElementById('f-category').value = '';
+      document.getElementById('f-servings').value = '';
+      document.getElementById('f-ingredients').value = '';
+      document.getElementById('f-instructions').value = '';
+    }
+
+    overlay.classList.add('open');
+    document.getElementById('f-name').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    editingId = null;
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  // ─────────────────────────────────────────────
+  //  SAVE / DELETE
+  // ─────────────────────────────────────────────
+
+  function saveRecipe() {
+    const fields = {
+      name: document.getElementById('f-name').value,
+      category: document.getElementById('f-category').value,
+      servings: document.getElementById('f-servings').value,
+      ingredients: document.getElementById('f-ingredients').value,
+      instructions: document.getElementById('f-instructions').value,
+    };
+
+    const { valid, errors } = validateRecipe(fields);
+    clearErrors();
+
+    if (!valid) {
+      errors.forEach(field => {
+        const el = document.getElementById('err-' + field);
+        if (el) el.classList.add('show');
+      });
+      return;
+    }
+
+    if (editingId) {
+      recipes = updateRecipe(recipes, editingId, fields);
+    } else {
+      const newRecipe = createRecipe(fields);
+      recipes = addRecipe(recipes, newRecipe);
+    }
+
+    saveToStorage(recipes);
+    closeModal();
+    renderRecipes();
+  }
+
+  function handleDelete(id) {
+    if (!confirm('Delete this recipe?')) return;
+    recipes = deleteRecipe(recipes, id);
+    saveToStorage(recipes);
+    renderRecipes();
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
+  }
+
+  // ─────────────────────────────────────────────
+  //  UTILITIES
+  // ─────────────────────────────────────────────
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Keyboard: Escape closes modal
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // ─────────────────────────────────────────────
+  //  INIT
+  // ─────────────────────────────────────────────
+  renderRecipes();
+</script>
+</body>
+</html>
