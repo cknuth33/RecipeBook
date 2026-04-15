@@ -1,10 +1,11 @@
 {
   "name": "recipebook",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.2.0",
+  "description": "Household recipe manager — mock three-tier architecture",
+  "main": "backend/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node backend/server.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,9 @@
     "url": "https://github.com/cknuth33/RecipeBook/issues"
   },
   "homepage": "https://github.com/cknuth33/RecipeBook#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
   "devDependencies": {
     "jest": "^30.3.0"
   }
