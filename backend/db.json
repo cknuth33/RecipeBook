@@ -1,0 +1,34 @@
+{
+  "users": [
+    { "id": "1", "username": "admin", "password": "password123" }
+  ],
+  "recipes": [
+    {
+      "id": "1",
+      "name": "Classic Pancakes",
+      "category": "Breakfast",
+      "servings": 4,
+      "ingredients": "2 cups flour\n2 tbsp sugar\n2 tsp baking powder\n1/2 tsp salt\n2 eggs\n1 1/2 cups milk\n2 tbsp melted butter",
+      "instructions": "Mix dry ingredients in a bowl.\nWhisk wet ingredients separately.\nCombine and stir until just mixed.\nCook on greased griddle over medium heat until bubbles form, then flip.",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "Grandma's Chili",
+      "category": "Dinner",
+      "servings": 6,
+      "ingredients": "1 lb ground beef\n1 can kidney beans\n1 can diced tomatoes\n1 onion, chopped\n2 cloves garlic\n2 tbsp chili powder\n1 tsp cumin\nsalt and pepper",
+      "instructions": "Brown the beef in a large pot. Add onion and garlic, cook until soft.\nStir in tomatoes, beans, and spices.\nSimmer for 30 minutes, stirring occasionally.",
+      "createdAt": "2024-01-02T00:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "name": "Avocado Toast",
+      "category": "Breakfast",
+      "servings": 1,
+      "ingredients": "2 slices sourdough bread\n1 ripe avocado\nsalt and pepper\nred pepper flakes\nlemon juice",
+      "instructions": "Toast the bread.\nMash avocado with salt, pepper, and a squeeze of lemon.\nSpread on toast and top with red pepper flakes.",
+      "createdAt": "2024-01-03T00:00:00.000Z"
+    }
+  ]
+}
