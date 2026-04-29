@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recipe Box</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div id="login-section">
+  <h1>Recipe Box</h1>
+  <p>household recipe manager · v0.2.0</p>
+
+  <div id="login-error"></div>
+
+  <div class="field">
+    <label for="login-username">username</label>
+    <input type="text" id="login-username" placeholder="e.g. admin" autocomplete="username" />
+  </div>
+
+  <div class="field">
+    <label for="login-password">password</label>
+    <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+  </div>
+
+  <button onclick="login()" style="width:100%; margin-top:0.5rem;">log in</button>
+</div>
+
+<!-- ── Main App (hidden until login) ── -->
+<div id="app-section">
+
+  <header>
+    <h1>Recipe Box</h1>
+    <span>household recipe manager · v0.2.0</span>
+    <div class="header-right">
+      <span id="current-user"></span>
+      <button class="secondary" onclick="logout()" style="padding:0.3rem 0.7rem; font-size:0.72rem;">log out</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="status-banner"></div>
+
+    <div class="controls">
+      <input type="text" id="search-input" placeholder="search recipes…" oninput="renderRecipes()" />
+      <button onclick="openModal()">+ add recipe</button>
+    </div>
+
+    <div id="recipe-count"></div>
+    <div id="recipe-list"></div>
+  </div>
+
+</div>
+
+<!-- ── Add / Edit Modal ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <h2 id="modal-title">add recipe</h2>
+
+    <div class="field">
+      <label for="f-name">recipe name *</label>
+      <input type="text" id="f-name" placeholder="e.g. Grandma's Chili" />
+      <div class="error-msg" id="err-name">Name is required.</div>
+    </div>
+
+    <div class="field">
+      <label for="f-category">category</label>
+      <select id="f-category">
+        <option value="">— none —</option>
+        <option>Breakfast</option>
+        <option>Lunch</option>
+        <option>Dinner</option>
+        <option>Dessert</option>
+        <option>Snack</option>
+        <option>Drink</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="f-servings">servings</label>
+      <input type="number" id="f-servings" min="1" placeholder="e.g. 4" />
+    </div>
+
+    <div class="field">
+      <label for="f-ingredients">ingredients *</label>
+      <textarea id="f-ingredients" rows="4" placeholder="one per line&#10;e.g. 2 cups flour&#10;1 tsp salt"></textarea>
+      <div class="error-msg" id="err-ingredients">At least one ingredient is required.</div>
+    </div>
+
+    <div class="field">
+      <label for="f-instructions">instructions *</label>
+      <textarea id="f-instructions" rows="5" placeholder="step-by-step instructions…"></textarea>
+      <div class="error-msg" id="err-instructions">Instructions are required.</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal()">cancel</button>
+      <button id="modal-save-btn" onclick="saveRecipe()">save recipe</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
