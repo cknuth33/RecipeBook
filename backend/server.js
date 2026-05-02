@@ -117,7 +117,11 @@ app.delete('/api/recipes/:id', (req, res) => {
 
 // ─── START ───────────────────────────────────────────────────────────────────
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Recipe Box running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  const PORT = 3000;
+  app.listen(PORT, () => {
+    console.log(`Recipe Box running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
