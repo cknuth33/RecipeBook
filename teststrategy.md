@@ -61,6 +61,7 @@ Manual testing is used where automation is weak — adapting to visual layout ch
 
 These qualitative metrics are best gathered through **direct user observation** or informal feedback sessions, since there is no analytics or logging infrastructure currently in place.
 
+> Detailed usability-testing protocol: see [usabilitytestplan.md](usabilitytestplan.md).
 ---
 
 ## Summary
