@@ -163,24 +163,27 @@ function renderRecipes() {
   }
 
   list.innerHTML = visible.map(r => `
-    <div class="recipe-card" id="card-${r.id}">
+    <div class="recipe-card" id="card-${r.id}" data-testid="recipe-card">
       <div class="card-header" onclick="toggleCard('${r.id}')">
         <div>
-          <h2>${escapeHtml(r.name)}</h2>
+          <h2 data-testid="recipe-name">${escapeHtml(r.name)}</h2>
           <div class="card-meta">
             ${r.category ? `<span>📂 ${escapeHtml(r.category)}</span>` : ''}
             ${r.servings ? `<span>🍽 ${r.servings} servings</span>` : ''}
           </div>
         </div>
         <div class="card-actions">
-          <button class="secondary" onclick="event.stopPropagation(); openModal('${r.id}')">edit</button>
-          <button class="danger" onclick="event.stopPropagation(); handleDelete('${r.id}')">delete</button>
+          <button class="secondary" data-testid="recipe-edit" 
+onclick="event.stopPropagation(); openModal('${r.id}')">edit</button>
+          <button class="danger" data-testid="recipe-delete" 
+onclick="event.stopPropagation(); handleDelete('${r.id}')">delete</button>
         </div>
       </div>
-      <div class="card-body" id="body-${r.id}">
+      <div class="card-body" id="body-${r.id}" data-testid="recipe-body">
         <h3>ingredients</h3>
         <ul>
-          ${r.ingredients.split('\n').filter(l => l.trim()).map(l => `<li>${escapeHtml(l.trim())}</li>`).join('')}
+          ${r.ingredients.split('\n').filter(l => l.trim()).map(l => 
+`<li>${escapeHtml(l.trim())}</li>`).join('')}
         </ul>
         <h3>instructions</h3>
         <p>${escapeHtml(r.instructions).replace(/\n/g, '<br/>')}</p>
