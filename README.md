@@ -1,4 +1,4 @@
-# RecipeBook
+# RecipeBook.
 
 A household recipe manager built as a three-tier web application. Store, browse, edit, and search your recipes through a clean browser interface backed by a REST API.
 
