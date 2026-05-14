@@ -183,14 +183,17 @@ Run all tests: `npm test` from the `RecipeBook/` directory.
 
 ## Manual Tests — Frontend UI
 
-These tests are executed by a human in a browser at `http://localhost:3000`. They are not automated because they verify visual rendering and user-facing interactions.
+These tests are executed by a human in a browser at `http://localhost:3000`. They verify 
+aspects of the UI that the automated suites cannot reliably cover — visual rendering, 
+multiple browser engines, responsive layout, keyboard interaction, and animation timing.
 
 **Prerequisite for all UI tests:** Server is running (`npm start` or `docker run`).
 
 ### TC-UI-01: Recipe list loads on page open
 - **Setup:** Server running
 - **Steps:** Open `http://localhost:3000` in a browser
-- **Validate:** The 3 seeded recipes (Classic Pancakes, Grandma's Chili, Avocado Toast) are visible
+- **Validate:** The 3 seeded recipes (Classic Pancakes, Grandma's Chili, Avocado Toast) 
+are visible
 
 ### TC-UI-02: Add recipe form submits successfully
 - **Setup:** Server running
@@ -200,12 +203,14 @@ These tests are executed by a human in a browser at `http://localhost:3000`. The
 ### TC-UI-03: Form rejects submission with missing required fields
 - **Setup:** Server running
 - **Steps:** Leave the name field blank; click Submit
-- **Validate:** An error or validation message is shown; no new recipe is added to the list
+- **Validate:** An error or validation message is shown; no new recipe is added to the 
+list
 
 ### TC-UI-04: Recipe detail view shows correct content
 - **Setup:** Server running
 - **Steps:** Click on a recipe in the list
-- **Validate:** The detail view displays the correct name, ingredients, and instructions for that recipe
+- **Validate:** The detail view displays the correct name, ingredients, and instructions 
+for that recipe
 
 ### TC-UI-05: Delete a recipe from the UI
 - **Setup:** Server running
@@ -213,5 +218,61 @@ These tests are executed by a human in a browser at `http://localhost:3000`. The
 - **Validate:** The recipe is removed from the list
 
 ---
+
+## Manual Tests — Complements to the E2E Suite
+
+The automated Playwright spec (`e2e/home-cook.spec.js`) covers the home-cook golden path 
+end-to-end in **Chromium at a desktop viewport with mouse input**. The following cases sit 
+*outside* that envelope and remain manual: they exercise rendering and interaction modes 
+the automation cannot cheaply or reliably check.
+
+These are not duplicates of TC-UI-01–05 above. They assume the automated suite is already 
+passing and ask: "What's left that a human still needs to look at?"
+
+### TC-UI-06: Cross-browser smoke check (Firefox & Safari)
+- **Setup:** Server running. Skip if the only available browser is Chromium — that is the 
+automation's domain.
+- **Steps:** Run the home-cook golden path manually (login → add → search → expand → 
+edit → delete) in **Firefox**, then in **Safari** (or a WebKit-based browser on a Mac).
+- **Validate:** Each step completes without visual breakage, console errors, or rendering 
+glitches; the modal, status banner, and confirm dialog look correct in each engine.
+- **Why manual:** Playwright is configured for Chromium only; other engines surface 
+different CSS, font, and dialog-rendering quirks that the automation does not catch.
+
+### TC-UI-07: Responsive layout on a phone viewport
+- **Setup:** Server running. Open Chrome DevTools device toolbar (or a real phone) and set 
+the viewport to a typical phone size (e.g. iPhone 14, 390×844).
+- **Steps:** Log in, expand a recipe card, open the **add recipe** modal, fill a field, 
+scroll within the modal, close it.
+- **Validate:** All controls remain reachable; no horizontal scroll; the modal does not 
+exceed the viewport; touch targets are comfortable; text is legible without pinch-zoom.
+- **Why manual:** The home-cook persona uses the app mid-cooking, often on a phone propped 
+against the backsplash. The automation runs at a desktop viewport and will not flag a 
+broken mobile layout.
+
+### TC-UI-08: Keyboard-only navigation
+- **Setup:** Server running. Do not use the mouse for this test.
+- **Steps:** From the login screen, tab to each field, type credentials, press **Enter** 
+to submit. Once in the app, tab to the search input, the **+ add recipe** button, then 
+open the modal with Enter. Tab through every modal field. Press **Escape** to close the 
+modal.
+- **Validate:** Focus order is logical (top-to-bottom, left-to-right); every interactive 
+control is reachable; the visible focus ring is never lost; Enter submits the login form; 
+Escape closes the modal; the modal traps focus while open (Tab does not move focus to the 
+page behind it).
+- **Why manual:** The automation interacts via direct DOM events and does not validate 
+focus rings, focus traps, or that key handlers (`Enter` on login, `Escape` on the modal) 
+behave correctly for keyboard-only users.
+
+### TC-UI-09: Status banner fade-out timing
+- **Setup:** Server running. Log in.
+- **Steps:** Add a recipe and watch the green "Recipe added." banner. Do not click 
+anything for at least 5 seconds.
+- **Validate:** The banner appears immediately on save, remains readable for ~3 seconds, 
+then disappears smoothly (no visual jank, no leftover styling). Repeat by editing a recipe 
+— banner should read "Recipe updated." and behave the same way.
+- **Why manual:** The automation asserts the banner text but only synchronously — it 
+cannot reliably verify the 3-second visual lifecycle, smoothness of the fade, or that the 
+banner does not persist as a stuck element on the page.
 
 > For user-centric usability evaluation (think-aloud sessions, task scenarios, SUS scoring), see [usabilitytestplan.md](usabilitytestplan.md).
