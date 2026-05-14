@@ -110,9 +110,10 @@ async function saveRecipe() {
   data = await res.json();
 
   if (res.ok && data.success) {
+    const wasEditing = editingId !== null;
     closeModal();
     await loadRecipes();
-    showStatus(editingId ? 'Recipe updated.' : 'Recipe added.', false);
+    showStatus(wasEditing ? 'Recipe updated.' : 'Recipe added.', false);
   } else {
     // Failure path: 400 bad request or 404 not found
     showStatus(data.message || 'Failed to save recipe.', true);
