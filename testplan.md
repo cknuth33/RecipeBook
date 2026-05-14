@@ -211,3 +211,7 @@ These tests are executed by a human in a browser at `http://localhost:3000`. The
 - **Setup:** Server running
 - **Steps:** Click the delete action on a recipe
 - **Validate:** The recipe is removed from the list
+
+---
+
+> For user-centric usability evaluation (think-aloud sessions, task scenarios, SUS scoring), see [usabilitytestplan.md](usabilitytestplan.md).
